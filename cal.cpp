@@ -18,20 +18,41 @@ int main(int argc, char *argv[])
 	std::time_t now = time(0);
 	tm *date = std::localtime(&now);
 
-	if (argc == 2) {
-		string tmp = argv[1];
-		int month = 0;
+	if (argc == 1) {
+		int month = date->tm_mon + 1;
 		int year = 1900 + date->tm_year;
-		for (auto c : tmp)
-			month = month * 10 + c - '0';
 
 		int maxday = get_maxday(month, year);
-		
+
 		int first_day = get_day_of_week(year, month);
 
 		output_date(month_name[month - 1], year, first_day, maxday);
+	} 
+	else if (argc == 2) {
+		string tmp = argv[1];
+		int month, year, rounds;
+		if (tmp.size() > 2) {
+			year = 0, month = 1;
+			for (auto c : tmp)
+				year = year * 10 + c - '0';
+			rounds = 12;
+		} else {
+			month = 0;
+			for (auto c : tmp)
+				month = month * 10 + c - '0';
+			year = 1900 + date->tm_year;
+			rounds = 1;
+		}
+		
+		for (int i = 0; i < rounds; i++) {
+			int maxday = get_maxday(month, year);
+			int first_day = get_day_of_week(year, month);
+			output_date(month_name[month - 1], year, first_day, maxday);
+			++month;
+		}
 
-	} else if (argc == 3) {
+	} 
+	else if (argc == 3) {
 		string tmp_month = argv[1];
 		string tmp_year = argv[2];
 		int month = 0, year = 0;
@@ -46,7 +67,8 @@ int main(int argc, char *argv[])
 
 		output_date(month_name[month - 1], year, first_day, maxday);
 
-	} else cout << "Error!!!\n";
+	}
+	else cout << "Wrong Arg(s)!!!\n";
 
 	return 0;
 }
@@ -82,15 +104,17 @@ void output_date(string month_name, int year, int first_day, int maxday)
 	cout << month_name << ' ' << year << '\n';
 	cout << "Su Mo Tu We Th Fr Sa" << '\n';
 	cout << "--------------------" << '\n';
-	cout << std::setw(3 * first_day + 2) << 1;
-	++first_day;
-	for (int i = 2; i <= maxday; i++) {
-		cout << std::setw((first_day == 0) ? 2 : 3) << i;
+	
+	for (int i = 1; i <= maxday; i++) {
+		if (i == 1)
+			cout << std::setw(3 * first_day + 2) << 1;
+		else
+			cout << std::setw((first_day == 0) ? 2 : 3) << i;
 
-		if (first_day == 6) {
+		if (first_day >= 6 && i != maxday) {
 			cout << '\n';
 			first_day = 0;
 		} else ++first_day;
 	}
-	cout << std::endl;
+	cout << '\n' << std::endl;
 }
